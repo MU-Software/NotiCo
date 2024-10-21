@@ -1,0 +1,7 @@
+{
+  "app_name": "notico",
+  "lambda_functions": {
+    "automatic_layer": true
+  },
+  "version": "2.0"
+}

@@ -1,0 +1,69 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+default_language_version:
+    python: python3.11
+default_stages: [pre-commit, pre-push]
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+    - id: check-json
+    - id: check-toml
+    - id: check-xml
+    - id: check-yaml
+    - id: check-added-large-files
+    - id: detect-aws-credentials
+      args:
+        - --allow-missing-credentials
+    - id: detect-private-key
+    - id: end-of-file-fixer
+    - id: mixed-line-ending
+    - id: pretty-format-json
+      args:
+        - --autofix
+    - id: trailing-whitespace
+      exclude_types:
+        - javascript
+        - markdown
+-   repo: https://github.com/PyCQA/flake8
+    rev: 7.1.1
+    hooks:
+    - id: flake8
+      additional_dependencies:
+        - flake8-bugbear
+        - flake8-noqa
+      args:
+      - --max-line-length=120
+      - --max-complexity=18
+-   repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks:
+    - id: black
+      language_version: python3.12
+      args:
+        - --line-length=120
+-   repo: https://github.com/PyCQA/bandit
+    rev: '1.7.9'
+    hooks:
+    - id: bandit
+-   repo: https://github.com/PyCQA/isort
+    rev: '5.13.2'
+    hooks:
+      - id: isort
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.11.2'
+    hooks:
+      - id: mypy
+        args:
+          - --no-strict-optional
+          - --ignore-missing-imports
+          - --check-untyped-defs
+          - --disallow-untyped-defs
+          - --disallow-incomplete-defs
+          - --disallow-untyped-calls
+        additional_dependencies:
+          - types-redis
+-   repo: https://github.com/dosisod/refurb
+    rev: v2.0.0
+    hooks:
+      - id: refurb

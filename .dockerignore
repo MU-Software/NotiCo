@@ -165,9 +165,6 @@ cython_debug/
 # AWS CDK local build output
 **/*.out/
 **/.chalice/deployments/
-**/deployment.zip
-**/chalice-build/
-**/sam.json
 
 # macOS related
 .DS_Store
