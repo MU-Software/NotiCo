@@ -58,6 +58,7 @@ class DockerizedChalice(chalice.cdk.Chalice):
             sam_template: SamTemplateType = json.load(sam_template_file)
 
             for function_logical_id, function in self._filter_resources(sam_template, "AWS::Serverless::Function"):
+                handler = function["Properties"]["Handler"]
                 for key in ("Runtime", "CodeUri", "Handler"):
                     function["Properties"].pop(key, None)
 
@@ -65,7 +66,7 @@ class DockerizedChalice(chalice.cdk.Chalice):
                     {
                         "PackageType": "Image",
                         "ImageUri": f"{self.ecr_repo.repository_uri}:latest",
-                        "ImageConfig": {"Command": ["app.app"]},
+                        "ImageConfig": {"Command": [handler]},
                     }
                 )
 
