@@ -7,6 +7,14 @@ import chalicelib.config
 import chalicelib.route
 import chalicelib.worker
 
+if typing.TYPE_CHECKING:
+    import mypy_boto3_sqs.type_defs
+
+    SQSEventType = typing.TypedDict("SQSEventType", {"Records": list["mypy_boto3_sqs.type_defs.MessageTypeDef"]})
+else:
+    SQSEventType = dict[str, typing.Any]
+
+
 config = chalicelib.config.get_config()
 app = chalice.app.Chalice(app_name="notico")
 app.log.setLevel(logging.DEBUG)
@@ -15,13 +23,18 @@ chalicelib.route.register_route(app)
 
 
 @app.on_sqs_message(queue=config.infra.queue_name)
-def sqs_handler(event: chalice.app.SQSEvent) -> dict[str, typing.Any]:
-    try:
-        parsed_event = event.to_dict()
-        app.log.info(f"event: {parsed_event}")
-        result = chalicelib.worker.workers[json.loads(parsed_event["body"])["worker"]](event)
-        app.log.info(f"result: {result}")
-        return result
-    except Exception as e:
-        app.log.error(f"Failed to handle event: {parsed_event}", exc_info=e)
-        return {"error": "Failed to handle event"}
+def sqs_handler(event: chalice.app.SQSEvent) -> list[dict[str, typing.Any]]:
+    parsed_event: SQSEventType = event.to_dict()
+    app.log.info(f"{parsed_event=}")
+
+    results: list[dict[str, typing.Any]] = []
+    for record in parsed_event["Records"]:
+        try:
+            result = chalicelib.worker.workers[json.loads(record["body"])["worker"]](event)
+            results.append(result)
+        except Exception as e:
+            app.log.error(f"Failed to handle event: {record}", exc_info=e)
+            results.append({"error": "Failed to handle event"})
+
+    app.log.info(f"{results=}")
+    return results
