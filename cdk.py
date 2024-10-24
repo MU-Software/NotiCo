@@ -162,7 +162,7 @@ class NotiCoEcr(aws_cdk.Stack):
         )
 
 
-class NoticoApp(aws_cdk.Stack):
+class NotiCoApp(aws_cdk.Stack):
     def __init__(
         self,
         scope: aws_cdk.App,
@@ -185,8 +185,16 @@ class NoticoApp(aws_cdk.Stack):
                 "environment_variables": config.env_vars,
             },
         )
-        queue.grant_consume_messages(grantee=app.get_role("DefaultRole"))
-        s3_bucket.grant_read(identity=app.get_role("DefaultRole"))
+        app_default_role = app.get_role("DefaultRole")
+        queue.grant_consume_messages(grantee=app_default_role)
+        s3_bucket.grant_read(identity=app_default_role)
+        app_default_role.add_to_principal_policy(
+            statement=aws_cdk.aws_iam.PolicyStatement(
+                actions=["ses:SendEmail", "SES:SendRawEmail"],
+                resources=["*"],
+                effect=aws_cdk.aws_iam.Effect.ALLOW,
+            ),
+        )
 
 
 if __name__ == "__main__":
@@ -195,7 +203,7 @@ if __name__ == "__main__":
     notico_queue = NoticoQueue(scope=app, id="notico-queue", config=config)
     notico_ecr = NotiCoEcr(scope=app, id="notico-ecr", config=config)
     notico_s3 = NotiCoS3(scope=app, id="notico-s3", config=config)
-    notico_app = NoticoApp(
+    notico_app = NotiCoApp(
         scope=app,
         id="notico-app",
         config=config,
