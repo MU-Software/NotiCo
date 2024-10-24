@@ -14,6 +14,7 @@ ifeq (docker-build,$(firstword $(MAKECMDGOALS)))
   $(eval $(TAG_NAME):;@:)
 endif
 TAG_NAME := $(if $(TAG_NAME),$(TAG_NAME),local)
+TAG_NAME_FOR_PROD := $(shell date +%Y%m%d-%H%M%S)
 
 ifeq ($(DOCKER_DEBUG),true)
 	DOCKER_MID_BUILD_OPTIONS = --progress=plain --no-cache
@@ -54,10 +55,13 @@ stack-ecr-deploy:
 stack-queue-deploy:
 	@cdk deploy notico-queue
 
-stack-lambda-deploy:
-	@cdk deploy notico-app
+stack-s3-deploy:
+	@cdk deploy notico-s3
 
-stack-deploy: docker-build-prod stack-queue-deploy stack-lambda-deploy
+stack-lambda-deploy:
+	@DOCKER_TAG=$(TAG_NAME_FOR_PROD) cdk deploy notico-app
+
+stack-deploy: docker-build-prod stack-queue-deploy stack-s3-deploy stack-lambda-deploy
 
 # =============================================================================
 # Docker related commands
@@ -86,9 +90,9 @@ docker-build: docker-prebuild
 docker-build-prod: stack-ecr-deploy docker-prebuild
 	@aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
 	@docker build \
-		-f ./Dockerfile -t $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(IMAGE_NAME):latest \
+		-f ./Dockerfile -t $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(IMAGE_NAME):$(TAG_NAME_FOR_PROD) \
 		--platform linux/amd64 \
 		--build-arg GIT_HASH=$(shell git rev-parse HEAD) \
 		--build-arg IMAGE_BUILD_DATETIME=$(shell date +%Y-%m-%d_%H:%M:%S) \
 		$(PROJECT_DIR)
-	@docker push $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(IMAGE_NAME):latest
+	@docker push $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(IMAGE_NAME):$(TAG_NAME_FOR_PROD)

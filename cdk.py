@@ -10,6 +10,7 @@ import chalice.cdk
 import runtime.chalicelib.config as config_module
 
 RUNTIME_DIR = pathlib.Path(__file__).parent / "runtime"
+DOCKER_TAG = os.environ.get("DOCKER_TAG", "latest")
 
 
 class CDKStackKeywordArguments(typing.TypedDict):
@@ -65,7 +66,7 @@ class DockerizedChalice(chalice.cdk.Chalice):
                 function["Properties"].update(
                     {
                         "PackageType": "Image",
-                        "ImageUri": f"{self.ecr_repo.repository_uri}:latest",
+                        "ImageUri": f"{self.ecr_repo.repository_uri}:{DOCKER_TAG}",
                         "ImageConfig": {"Command": [handler]},
                     }
                 )
