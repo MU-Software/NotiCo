@@ -7,8 +7,10 @@ class SlackHandler(logging.handlers.HTTPHandler):
     channel: str = ""
     token: str = ""
 
-    def __init__(self) -> None:
+    def __init__(self, channel: str, token: str) -> None:
         super().__init__(host="slack.com", url="/api/chat.postMessage", method="POST", secure=True)
+        self.channel = channel
+        self.token = token
 
     def mapLogRecord(self, record: logging.LogRecord) -> dict[str, str]:
         return {
