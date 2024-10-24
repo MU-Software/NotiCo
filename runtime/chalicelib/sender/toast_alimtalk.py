@@ -7,6 +7,7 @@ import logging
 import typing
 
 import chalicelib.config
+import chalicelib.sender.__interface__ as sender_interface
 import chalicelib.util.decorator_util as decorator_util
 import httpx
 import pydantic
@@ -156,13 +157,47 @@ class ToastAlimTalkClient(pydantic.BaseModel):
         return self.conf.get_session("alimtalk")
 
     @decorator_util.retry
-    def send(self, payload: MsgSendRequest) -> MsgSendResponse | None:
+    def send(self) -> dict | None:
         response = self.session.post(
-            url="/messages" if payload.__class__ == MsgSendRequest else "/raw-messages",
+            url="/messages" if self.payload.__class__ == MsgSendRequest else "/raw-messages",
             json=self.payload.model_dump(mode="json"),
         ).raise_for_status()
         logger.debug(f"Response :\n{response.content.decode(errors='ignore')}")
 
         with contextlib.suppress(pydantic.ValidationError, json.JSONDecodeError):
-            return MsgSendResponse.model_validate_json(response.content)
+            return MsgSendResponse.model_validate_json(response.content).model_dump()
         return None
+
+
+class ToastAlimTalkSendRequest(sender_interface.NotificationSendRequest):
+    def to_toast_alimtalk_client(self) -> ToastAlimTalkClient:
+        return ToastAlimTalkClient.model_validate(
+            {
+                "conf": self.conf.toast,
+                "payload": {
+                    "senderKey": self.conf.toast.sender_key.get_secret_value(),
+                    # TODO: FIXME: Check if the template code is valid by requesting to the Toast API.
+                    "templateCode": self.template_code,
+                    "recipientList": [
+                        {
+                            "recipientNo": send_to,
+                            "templateParameter": personalized_data,
+                        }
+                        for send_to, personalized_data in self.personalized_context.items()
+                    ],
+                },
+            }
+        )
+
+
+def send_notification(request: ToastAlimTalkSendRequest | dict) -> dict | None:
+    return (
+        (ToastAlimTalkSendRequest.model_validate(request) if isinstance(request, dict) else request)
+        .to_toast_alimtalk_client()
+        .send()
+    )
+
+
+sender_patterns = {
+    "toast_alimtalk": send_notification,
+}
