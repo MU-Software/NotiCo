@@ -90,6 +90,7 @@ def send_mail(
             headers={
                 "Content-Type": "application/x-www-form-urlencoded",
             },
+            timeout=30,
         )
         .raise_for_status()
         .json()["access_token"]
@@ -141,6 +142,7 @@ if __name__ == "__main__":
             headers={
                 "Content-Type": "application/x-www-form-urlencoded",
             },
+            timeout=30,
         )
         .raise_for_status()
         .json()
