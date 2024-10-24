@@ -30,7 +30,7 @@ def sqs_handler(event: chalice.app.SQSEvent) -> list[dict[str, typing.Any]]:
     results: list[dict[str, typing.Any]] = []
     for record in parsed_event["Records"]:
         try:
-            result = chalicelib.worker.workers[json.loads(record["body"])["worker"]](event)
+            result = chalicelib.worker.workers[json.loads(record["body"])["worker"]](record)
             results.append(result)
         except Exception as e:
             app.log.error(f"Failed to handle event: {record}", exc_info=e)
