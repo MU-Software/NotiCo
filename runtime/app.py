@@ -18,6 +18,7 @@ else:
 
 config = chalicelib.config.get_config()
 app = chalice.app.Chalice(app_name="notico")
+app.log.setLevel(logging.INFO)
 
 if config.slack.is_configured():
     slack_logger.SlackLogger(channel=config.slack.channel, token=config.slack.token.get_secret_value(), logger=app.log)

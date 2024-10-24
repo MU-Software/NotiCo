@@ -9,11 +9,11 @@ import chalicelib.logger.slack.handler as slack_handler
 class SlackLogger:
     channel: str
     token: str
-    level: int = logging.DEBUG
+    slack_logger_level: int = logging.WARNING
     logger: logging.Logger = dataclasses.field(default_factory=lambda: logging.getLogger("slack"))
 
     def __post_init__(self) -> None:
         handler = slack_handler.SlackHandler(channel=self.channel, token=self.token)
         handler.setFormatter(slack_formatter.SlackJsonFormatter())
+        handler.setLevel(self.slack_logger_level)
         self.logger.addHandler(handler)
-        self.logger.setLevel(self.level)
