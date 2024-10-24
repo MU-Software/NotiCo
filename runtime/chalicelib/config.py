@@ -11,13 +11,14 @@ AllowedToastServices = typing.Literal["alimtalk"]
 
 class InfraConfig(pydantic_settings.BaseSettings):
     ecr_repo_name: str = "notico"
+    lambda_name: str = "notico-lambda"
+    s3_bucket_name: str = "notico-s3"
 
     queue_name: str = "notico-queue.fifo"
     queue_visibility_timeout_second: int = 2 * 60
     queue_max_receive_count: int = 5
     dlq_name: str = "notico-dlq.fifo"
     dlq_visibility_timeout_second: int = 2 * 60
-    lambda_name: str = "notico-lambda"
 
 
 class _ServiceConfig(pydantic_settings.BaseSettings):
@@ -31,12 +32,12 @@ class ToastConfig(_ServiceConfig, pydantic_settings.BaseSettings):
     api_ver: str | None = None
     app_key: str | None = None
     secret_key: pydantic.SecretStr | None = None
+    sender_key: pydantic.SecretStr | None = None
     timeout: float = 3.0
 
     def get_base_url(self, service: AllowedToastServices) -> str:
         return urllib.parse.urljoin(self.domain, f"/{service}/{self.api_ver}/appkeys/{self.app_key}/")
 
-    @functools.lru_cache(maxsize=8)  # noqa: B019
     def get_session(self, service: AllowedToastServices) -> httpx.Client:
         return httpx.Client(
             base_url=self.get_base_url(service),

@@ -118,6 +118,24 @@ class NoticoQueue(aws_cdk.Stack):
         )
 
 
+class NotiCoS3(aws_cdk.Stack):
+    s3_bucket: aws_cdk.aws_s3.Bucket
+
+    def __init__(
+        self,
+        scope: aws_cdk.App,
+        id: str,
+        config: config_module.Config,
+        **kwargs: typing.Unpack[CDKStackKeywordArguments],
+    ) -> None:
+        super().__init__(scope=scope, id=id, **kwargs)
+        self.s3_bucket = aws_cdk.aws_s3.Bucket(
+            scope=self,
+            id=config.infra.ecr_repo_name,
+            bucket_name=config.infra.s3_bucket_name,
+        )
+
+
 class NotiCoEcr(aws_cdk.Stack):
     ecr_repo: aws_cdk.aws_ecr.Repository
 
@@ -150,6 +168,7 @@ class NoticoApp(aws_cdk.Stack):
         id: str,
         queue: aws_cdk.aws_sqs.Queue,
         ecr_repo: aws_cdk.aws_ecr.Repository,
+        s3_bucket: aws_cdk.aws_s3.Bucket,
         config: config_module.Config,
         **kwargs: typing.Unpack[CDKStackKeywordArguments],
     ) -> None:
@@ -166,6 +185,7 @@ class NoticoApp(aws_cdk.Stack):
             },
         )
         queue.grant_consume_messages(grantee=app.get_role("DefaultRole"))
+        s3_bucket.grant_read(identity=app.get_role("DefaultRole"))
 
 
 if __name__ == "__main__":
@@ -173,13 +193,16 @@ if __name__ == "__main__":
     app = aws_cdk.App()
     notico_queue = NoticoQueue(scope=app, id="notico-queue", config=config)
     notico_ecr = NotiCoEcr(scope=app, id="notico-ecr", config=config)
+    notico_s3 = NotiCoS3(scope=app, id="notico-s3", config=config)
     notico_app = NoticoApp(
         scope=app,
         id="notico-app",
         config=config,
         queue=notico_queue.queue,
         ecr_repo=notico_ecr.ecr_repo,
+        s3_bucket=notico_s3.s3_bucket,
     )
     notico_app.add_dependency(notico_queue)
     notico_app.add_dependency(notico_ecr)
+    notico_app.add_dependency(notico_s3)
     app.synth()
