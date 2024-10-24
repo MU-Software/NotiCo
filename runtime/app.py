@@ -4,6 +4,7 @@ import typing
 
 import chalice.app
 import chalicelib.config
+import chalicelib.logger.slack as slack_logger
 import chalicelib.route
 import chalicelib.worker
 
@@ -17,7 +18,12 @@ else:
 
 config = chalicelib.config.get_config()
 app = chalice.app.Chalice(app_name="notico")
-app.log.setLevel(logging.DEBUG)
+
+if config.slack.is_configured():
+    slack_logger.SlackLogger(channel=config.slack.channel, token=config.slack.token.get_secret_value(), logger=app.log)
+else:
+    app.log.setLevel(logging.DEBUG)
+    app.log.warning("Slack logger is not configured")
 
 chalicelib.route.register_route(app)
 

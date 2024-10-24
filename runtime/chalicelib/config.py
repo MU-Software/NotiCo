@@ -53,10 +53,16 @@ class FirebaseConfig(_ServiceConfig, pydantic_settings.BaseSettings):
     certificate: pydantic.SecretStr | None = None
 
 
+class SlackConfig(_ServiceConfig, pydantic_settings.BaseSettings):
+    channel: str | None = None
+    token: pydantic.SecretStr | None = None
+
+
 class Config(pydantic_settings.BaseSettings):
     infra: InfraConfig = pydantic.Field(default_factory=InfraConfig)
     toast: ToastConfig = pydantic.Field(default_factory=ToastConfig)
     firebase: FirebaseConfig = pydantic.Field(default_factory=FirebaseConfig)
+    slack: SlackConfig = pydantic.Field(default_factory=SlackConfig)
 
     env_vars: dict[str, str] = pydantic.Field(default_factory=dict)
 
