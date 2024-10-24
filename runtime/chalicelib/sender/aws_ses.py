@@ -51,7 +51,7 @@ class AWSSESRequest(pydantic.BaseModel):
 class AWSSESSendRequest(sender_interface.NotificationSendRequest):
     REQUIRED_SHARED_FIELDS: typing.ClassVar[set[str]] = {"from", "title"}
 
-    @pydantic.field_validator
+    @pydantic.field_validator("personalized_context", mode="before")
     @classmethod
     def validate_shared_context(cls, v: sender_interface.ContextType) -> sender_interface.ContextType:
         if all(k not in v for k in cls.REQUIRED_SHARED_FIELDS):
