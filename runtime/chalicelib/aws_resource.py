@@ -16,7 +16,7 @@ s3_client: "mypy_boto3_s3.client.S3Client" = boto3.client(service_name="s3")
 
 
 class S3ResourcePath(enum.StrEnum):
-    email_template = "email/template/{filename}"
+    email_template = "email/template/{filename}.html"
 
     def as_path(self, filename: str) -> str:
         return self.value.format(filename=filename)
