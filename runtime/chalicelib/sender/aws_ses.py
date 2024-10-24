@@ -1,9 +1,9 @@
-import string
 import typing
 
 import botocore.exceptions
 import chalicelib.aws_resource
 import chalicelib.sender.__interface__ as sender_interface
+import jinja2
 import pydantic
 
 if typing.TYPE_CHECKING:
@@ -70,8 +70,8 @@ class AWSSESSendRequest(sender_interface.NotificationSendRequest):
                 obj={
                     "from_address": self.shared_context["from"],
                     "to_addresses": [send_to],
-                    "title": string.Template(title_template).safe_substitute(**personalized_data),
-                    "body": string.Template(body_template).safe_substitute(**personalized_data),
+                    "title": jinja2.Template(title_template).render(personalized_data),
+                    "body": jinja2.Template(body_template).render(personalized_data),
                 }
             )
             for send_to, personalized_data in self.personalized_context.items()
