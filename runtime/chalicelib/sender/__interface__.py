@@ -2,7 +2,8 @@ import chalicelib.config as config_module
 import pydantic
 
 ReceiverType = str
-AllowedValueTypes = str | int | float
+AllowedBasicValueTypes = str | int | float | bool | None
+AllowedValueTypes = AllowedBasicValueTypes | list[AllowedBasicValueTypes] | dict[str, AllowedBasicValueTypes] | None
 ContextType = dict[str, AllowedValueTypes]
 
 
