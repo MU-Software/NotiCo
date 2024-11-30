@@ -45,7 +45,12 @@ hooks-upgrade: local-setup
 hooks-lint:
 	poetry run pre-commit run --all-files
 
+hooks-mypy:
+	poetry run pre-commit run mypy --all-files
+
 lint: hooks-lint  # alias
+
+mypy: hooks-mypy  # alias
 
 # =============================================================================
 # AWS CDK related commands
