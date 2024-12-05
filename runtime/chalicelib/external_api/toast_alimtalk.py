@@ -258,20 +258,20 @@ class ToastAlimTalkClient(pydantic.BaseModel):
     def send_alimtalk(self, payload: MsgSendRequest | RawMsgSendRequest) -> MsgSendResponse:
         url = "/messages" if payload.__class__ == MsgSendRequest else "/raw-messages"
         response = self.session.post(url=url, json=payload.model_dump(mode="json")).raise_for_status()
-        return MsgSendResponse.model_validate_json(response.content)
+        return MsgSendResponse.model_validate_json(response.read())
 
     @decorator_util.retry
     def get_template_categories(self) -> TemplateCategoriesResponse:
         url = "/template/categories"
-        return TemplateCategoriesResponse.model_validate_json(self.session.get(url=url).raise_for_status().content)
+        return TemplateCategoriesResponse.model_validate_json(self.session.get(url=url).raise_for_status().read())
 
     @decorator_util.retry
     def get_template_list(self, query_params: TemplateListQueryRequest | None = None) -> TemplateListResponse:
-        query_data: dict[str, str | int] = (query_params or TemplateListQueryRequest()).model_dump(exclude_none=True)
-        url = f"/senders/{self.config.sender_key.get_secret_value()}/templates?{urllib.parse.urlencode(query_data)}"
-        return TemplateListResponse.model_validate_json(self.session.get(url=url).raise_for_status().content)
+        query_str = urllib.parse.urlencode((query_params or TemplateListQueryRequest()).model_dump(exclude_none=True))
+        url = f"/senders/{self.config.sender_key.get_secret_value()}/templates?{query_str}"
+        return TemplateListResponse.model_validate_json(self.session.get(url=url).raise_for_status().read())
 
     @decorator_util.retry
     def delete_template(self, template_code: str) -> TemplateDeletionResponse:
         url = f"/senders/{self.config.sender_key.get_secret_value()}/templates/{template_code}"
-        return TemplateDeletionResponse.model_validate_json(self.session.delete(url=url).raise_for_status().content)
+        return TemplateDeletionResponse.model_validate_json(self.session.delete(url=url).raise_for_status().read())

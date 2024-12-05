@@ -16,7 +16,7 @@ def log_request(req: httpx.Request) -> None:
 
 def log_response(resp: httpx.Response) -> None:
     req = resp.request
-    logger.debug(f"RES [{req.method}]{req.url}<{resp.status_code}> {resp.content.decode(errors='ignore')=}")
+    logger.debug(f"RES [{req.method}]{req.url}<{resp.status_code}> {resp.read().decode(errors='ignore')=}")
 
 
 class InfraConfig(pydantic_settings.BaseSettings):
