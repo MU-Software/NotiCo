@@ -23,11 +23,11 @@ class ToastAlimtalkTemplateManager(template_mgr_interface.TemplateManagerInterfa
             for t in self.client.get_template_list().templateListResponse.templates
         ]
 
-    def retrieve(self, code: str) -> template_mgr_interface.TemplateInformation:
+    def retrieve(self, code: str) -> template_mgr_interface.TemplateInformation | None:
         query_params = toast_alimtalk_client.TemplateListQueryRequest(templateCode=code)
-        if not (t := self.client.get_template_list(query_params=query_params).templateListResponse.templates):
-            raise FileNotFoundError
-        return template_mgr_interface.TemplateInformation(code=t[0].templateCode, template=t[0].templateContent)
+        if t := self.client.get_template_list(query_params=query_params).templateListResponse.templates:
+            return template_mgr_interface.TemplateInformation(code=t[0].templateCode, template=t[0].templateContent)
+        return None
 
     def create(self, code: str, template_data: str) -> template_mgr_interface.TemplateInformation:
         raise NotImplementedError("Toast 콘솔에서 직접 템플릿을 생성해주세요.")

@@ -5,6 +5,7 @@ import functools
 import json
 import typing
 
+import botocore.exceptions
 import chalicelib.aws_resource as aws_resource
 import chalicelib.template_manager.__interface__ as template_mgr_interface
 import chalicelib.util.type_util as type_util
@@ -62,9 +63,12 @@ class S3ResourceTemplateManager(template_mgr_interface.TemplateManagerInterface)
         return [self.retrieve(code=f.split(sep=".")[0]) for f in self.resource.list_objects(filter_by_extension=True)]
 
     @functools.lru_cache  # noqa: B019
-    def retrieve(self, code: str) -> template_mgr_interface.TemplateInformation:
-        template_body: str = self.resource.download(code=code).decode(encoding="utf-8")
-        return template_mgr_interface.TemplateInformation(code=code, template=template_body)
+    def retrieve(self, code: str) -> template_mgr_interface.TemplateInformation | None:
+        try:
+            template_body: str = self.resource.download(code=code).decode(encoding="utf-8")
+            return template_mgr_interface.TemplateInformation(code=code, template=template_body)
+        except botocore.exceptions.ClientError:
+            return None
 
     def create(self, code: str, template_data: type_util.TemplateType) -> template_mgr_interface.TemplateInformation:
         self.check_template_valid(template_data=template_data)

@@ -1,10 +1,11 @@
-import chalicelib.util.type_util as type_util
+import chalice.app
+
+index_api = chalice.app.Blueprint(__name__)
 
 
+@index_api.route("/", methods=["GET"])
 def index() -> dict[str, str]:
     return {"service": "notico"}
 
 
-route_patterns: type_util.RouteInfoType = [
-    ("/", ["GET"], index),
-]
+blueprints: dict[str, chalice.app.Blueprint] = {"/": index_api}
