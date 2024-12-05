@@ -12,10 +12,10 @@ def list_template_manager_services() -> dict[str, list[str]]:
 
 
 @template_manager_api.route("/{service_name}", methods=["GET"])
-def list_templates(service_name: str) -> dict[str, list[dict[str, str]]]:
+def list_templates(service_name: str) -> list[dict[str, str]]:
     if service_name not in template_manager.template_managers:
         raise chalice.NotFoundError(f"Service {service_name} not found")
-    return {"templates": [t.model_dump(mode="json") for t in template_manager.template_managers[service_name].list()]}
+    return [t.model_dump(mode="json") for t in template_manager.template_managers[service_name].list()]
 
 
 @template_manager_api.route("/{service_name}/{code}", methods=["GET", "POST", "PUT", "DELETE"])
