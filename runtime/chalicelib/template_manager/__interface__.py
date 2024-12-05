@@ -18,12 +18,17 @@ import pydantic
 class TemplateInformation(pydantic.BaseModel):
     code: str
     template: type_util.TemplateType
+    template_variable_start_end_string: tuple[str, str]
 
     @pydantic.computed_field  # type: ignore[misc]
     @property
     def template_variables(self) -> set[str]:
         # From https://stackoverflow.com/a/77363330
-        template = jinja2.Environment(autoescape=True).parse(source=json.dumps(self.template))
+        template = jinja2.Environment(
+            autoescape=True,
+            variable_start_string=self.template_variable_start_end_string[0],
+            variable_end_string=self.template_variable_start_end_string[1],
+        ).parse(source=json.dumps(self.template, ensure_ascii=False))
         return jinja2.meta.find_undeclared_variables(ast=template)
 
 
@@ -32,6 +37,10 @@ TemplateStructureType = typing.TypeVar("TemplateStructureType", bound=pydantic.B
 
 class TemplateManagerInterface(typing.Protocol[TemplateStructureType]):
     template_structure_cls: type[TemplateStructureType] | type[str] | None = None
+    template_variable_start_end_string: typing.ClassVar[tuple[str, str]] = ("{{", "}}")
+
+    @property
+    def initialized(self) -> bool: ...
 
     def check_template_valid(self, template_data: type_util.TemplateType) -> bool:
         if not self.template_structure_cls or self.template_structure_cls == str:
@@ -59,6 +68,10 @@ S3TemplateStructureType = typing.TypeVar("S3TemplateStructureType", bound=pydant
 class S3ResourceTemplateManager(template_mgr_interface.TemplateManagerInterface):
     resource: typing.ClassVar[aws_resource.S3ResourcePath]
 
+    @property
+    def initialized(self) -> bool:
+        return True
+
     def list(self) -> list[template_mgr_interface.TemplateInformation]:
         return [self.retrieve(code=f.split(sep=".")[0]) for f in self.resource.list_objects(filter_by_extension=True)]
 
@@ -66,14 +79,22 @@ class S3ResourceTemplateManager(template_mgr_interface.TemplateManagerInterface)
     def retrieve(self, code: str) -> template_mgr_interface.TemplateInformation | None:
         try:
             template_body: str = self.resource.download(code=code).decode(encoding="utf-8")
-            return template_mgr_interface.TemplateInformation(code=code, template=template_body)
+            return template_mgr_interface.TemplateInformation(
+                code=code,
+                template=template_body,
+                template_variable_start_end_string=self.template_variable_start_end_string,
+            )
         except botocore.exceptions.ClientError:
             return None
 
     def create(self, code: str, template_data: type_util.TemplateType) -> template_mgr_interface.TemplateInformation:
         self.check_template_valid(template_data=template_data)
         self.resource.upload(code=code, content=template_data)
-        return template_mgr_interface.TemplateInformation(code=code, template=template_data)
+        return template_mgr_interface.TemplateInformation(
+            code=code,
+            template=template_data,
+            template_variable_start_end_string=self.template_variable_start_end_string,
+        )
 
     def update(self, code: str, template_data: type_util.TemplateType) -> template_mgr_interface.TemplateInformation:
         return self.create(code=code, template_data=template_data)

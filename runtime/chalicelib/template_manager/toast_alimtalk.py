@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import dataclasses
 import functools
+import typing
 
+import chalicelib.config as config_module
 import chalicelib.external_api.toast_alimtalk as toast_alimtalk_client
 import chalicelib.template_manager.__interface__ as template_mgr_interface
 import chalicelib.util.type_util as type_util
@@ -11,7 +13,12 @@ import jinja2
 
 @dataclasses.dataclass
 class ToastAlimtalkTemplateManager(template_mgr_interface.TemplateManagerInterface):
-    template_structure_cls = str
+    template_structure_cls = toast_alimtalk_client.Template
+    template_variable_start_end_string: typing.ClassVar[tuple[str, str]] = ("#{", "}")
+
+    @property
+    def initialized(self) -> bool:
+        return config_module.config.toast.is_configured()
 
     @functools.cached_property
     def client(self) -> toast_alimtalk_client.ToastAlimTalkClient:
@@ -19,14 +26,23 @@ class ToastAlimtalkTemplateManager(template_mgr_interface.TemplateManagerInterfa
 
     def list(self) -> list[template_mgr_interface.TemplateInformation]:
         return [
-            template_mgr_interface.TemplateInformation(code=t.templateCode, template=t.templateContent)
+            template_mgr_interface.TemplateInformation(
+                code=t.templateCode,
+                template=t.model_dump(mode="json"),
+                template_variable_start_end_string=self.template_variable_start_end_string,
+            )
             for t in self.client.get_template_list().templateListResponse.templates
+            if t.status == "TSC03"
         ]
 
     def retrieve(self, code: str) -> template_mgr_interface.TemplateInformation | None:
         query_params = toast_alimtalk_client.TemplateListQueryRequest(templateCode=code)
         if t := self.client.get_template_list(query_params=query_params).templateListResponse.templates:
-            return template_mgr_interface.TemplateInformation(code=t[0].templateCode, template=t[0].templateContent)
+            return template_mgr_interface.TemplateInformation(
+                code=t[0].templateCode,
+                template=t[0].model_dump(mode="json"),
+                template_variable_start_end_string=self.template_variable_start_end_string,
+            )
         return None
 
     def create(self, code: str, template_data: str) -> template_mgr_interface.TemplateInformation:
