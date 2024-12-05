@@ -4,7 +4,7 @@ import json
 import logging
 import typing
 
-import chalicelib.config
+import chalicelib.config as config_module
 import firebase_admin
 import firebase_admin.credentials
 import firebase_admin.messaging
@@ -51,8 +51,6 @@ class FirebaseCloudMessaging(pydantic.BaseModel):
     webpush: firebase_admin.messaging.WebpushConfig | None = None
     fcm_options: firebase_admin.messaging.FCMOptions | None = None
 
-    conf: chalicelib.config.FirebaseConfig
-
     model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
 
     @pydantic.field_validator("data", mode="before")
@@ -88,13 +86,13 @@ class FirebaseCloudMessaging(pydantic.BaseModel):
         ]
 
     def send(self) -> str:
-        if not self.conf.is_configured():
+        if not config_module.config.firebase.is_configured():
             raise ValueError("Firebase configuration is not set up properly.")
 
         with contextlib.suppress(ValueError):
             firebase_admin.initialize_app(
                 credential=firebase_admin.credentials.Certificate(
-                    cert=self.conf.certificate.get_secret_value(),
+                    cert=config_module.config.firebase.certificate.get_secret_value(),
                 )
             )
 

@@ -3,7 +3,7 @@ import logging
 import typing
 
 import chalice.app
-import chalicelib.config
+import chalicelib.config as config_module
 import chalicelib.logger.slack as slack_logger
 import chalicelib.route
 import chalicelib.worker
@@ -16,7 +16,7 @@ else:
     SQSEventType = dict[str, typing.Any]
 
 
-config = chalicelib.config.get_config()
+config = config_module.config
 app = chalice.app.Chalice(app_name="notico")
 app.log.setLevel(logging.INFO)
 
@@ -38,7 +38,7 @@ def sqs_handler(event: chalice.app.SQSEvent) -> list[dict[str, typing.Any]]:
     for record in parsed_event["Records"]:
         try:
             worker_name = json.loads(record["body"])["worker"]
-            result = chalicelib.worker.workers[worker_name](app=app, config=config, record=record)
+            result = chalicelib.worker.workers[worker_name](app=app, record=record)
             results.append(result)
         except Exception as e:
             app.log.error(f"Failed to handle event: {record}", exc_info=e)

@@ -198,7 +198,7 @@ class NotiCoApp(aws_cdk.Stack):
 
 
 if __name__ == "__main__":
-    config = config_module.get_config()
+    config = config_module.config
     app = aws_cdk.App()
     notico_queue = NoticoQueue(scope=app, id="notico-queue", config=config)
     notico_ecr = NotiCoEcr(scope=app, id="notico-ecr", config=config)

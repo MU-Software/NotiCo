@@ -1,4 +1,3 @@
-import chalicelib.config as config_module
 import pydantic
 
 ReceiverType = str
@@ -15,5 +14,3 @@ class NotificationSendRequest(pydantic.BaseModel):
     template_code: str
     shared_context: ContextType
     personalized_context: dict[ReceiverType, ContextType]
-
-    conf: config_module.Config

@@ -61,8 +61,7 @@ class AWSSESSendRequest(sender_interface.NotificationSendRequest):
     def to_aws_ses_request(self) -> list[AWSSESRequest]:
         title_template = self.shared_context["title"]
         body_template = chalicelib.aws_resource.S3ResourcePath.email_template.download(
-            conf=self.conf,
-            filename=self.template_code,
+            code=self.template_code,
         ).decode("utf-8")
 
         return [

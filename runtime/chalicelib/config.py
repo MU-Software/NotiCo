@@ -1,4 +1,4 @@
-import functools
+import logging
 import typing
 import urllib.parse
 
@@ -7,6 +7,16 @@ import pydantic
 import pydantic_settings
 
 AllowedToastServices = typing.Literal["alimtalk"]
+logger = logging.getLogger(__name__)
+
+
+def log_request(req: httpx.Request) -> None:
+    logger.debug(f"REQ [{req.method}]{req.url}")
+
+
+def log_response(resp: httpx.Response) -> None:
+    req = resp.request
+    logger.debug(f"RES [{req.method}]{req.url}<{resp.status_code}> {resp.content.decode(errors='ignore')=}")
 
 
 class InfraConfig(pydantic_settings.BaseSettings):
@@ -46,6 +56,7 @@ class ToastConfig(_ServiceConfig, pydantic_settings.BaseSettings):
                 "Content-Type": "application/json;charset=UTF-8",
             },
             timeout=self.timeout,
+            event_hooks={"request": [log_request], "response": [log_response]},
         )
 
 
@@ -55,6 +66,15 @@ class FirebaseConfig(_ServiceConfig, pydantic_settings.BaseSettings):
 
 class TelegramConfig(_ServiceConfig, pydantic_settings.BaseSettings):
     bot_token: pydantic.SecretStr | None = None
+    timeout: float = 3.0
+
+    def get_session(self) -> httpx.Client:
+        return httpx.Client(
+            base_url=f"https://api.telegram.org/bot{self.bot_token.get_secret_value()}/",
+            headers={"Content-Type": "application/json;charset=UTF-8"},
+            timeout=self.timeout,
+            event_hooks={"request": [log_request], "response": [log_response]},
+        )
 
 
 class SlackConfig(_ServiceConfig, pydantic_settings.BaseSettings):
@@ -72,6 +92,4 @@ class Config(pydantic_settings.BaseSettings):
     env_vars: dict[str, str] = pydantic.Field(default_factory=dict)
 
 
-@functools.lru_cache(maxsize=1)
-def get_config() -> Config:
-    return Config(_env_nested_delimiter="__", _case_sensitive=False)
+config = Config(_env_nested_delimiter="__", _case_sensitive=False)
