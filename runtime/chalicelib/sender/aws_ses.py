@@ -3,6 +3,7 @@ import typing
 import botocore.exceptions
 import chalicelib.aws_resource
 import chalicelib.sender.__interface__ as sender_interface
+import chalicelib.util.type_util as type_util
 import jinja2
 import pydantic
 
@@ -53,7 +54,7 @@ class AWSSESSendRequest(sender_interface.NotificationSendRequest):
 
     @pydantic.field_validator("shared_context", mode="before")
     @classmethod
-    def validate_shared_context(cls, v: sender_interface.ContextType) -> sender_interface.ContextType:
+    def validate_shared_context(cls, v: type_util.ContextType) -> type_util.ContextType:
         if all(k not in v for k in cls.REQUIRED_SHARED_FIELDS):
             raise ValueError("shared_context missing required fields")
         return v

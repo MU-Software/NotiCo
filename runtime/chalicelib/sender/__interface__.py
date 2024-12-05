@@ -1,9 +1,5 @@
+import chalicelib.util.type_util as type_util
 import pydantic
-
-ReceiverType = str
-AllowedBasicValueTypes = str | int | float | bool | None
-AllowedValueTypes = AllowedBasicValueTypes | list[AllowedBasicValueTypes] | dict[str, AllowedBasicValueTypes] | None
-ContextType = dict[str, AllowedValueTypes]
 
 
 class NotificationSendRequestSharedContext(pydantic.BaseModel):
@@ -12,5 +8,5 @@ class NotificationSendRequestSharedContext(pydantic.BaseModel):
 
 class NotificationSendRequest(pydantic.BaseModel):
     template_code: str
-    shared_context: ContextType
-    personalized_context: dict[ReceiverType, ContextType]
+    shared_context: type_util.ContextType
+    personalized_context: dict[str, type_util.ContextType]
