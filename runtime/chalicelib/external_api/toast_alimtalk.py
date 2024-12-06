@@ -240,7 +240,6 @@ class ToastAlimTalkError(Exception):
 
 
 class ToastAlimTalkClient(pydantic.BaseModel):
-
     exc_cls: type[Exception] = ToastAlimTalkError
 
     @functools.cached_property
