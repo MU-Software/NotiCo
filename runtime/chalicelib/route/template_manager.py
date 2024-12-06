@@ -8,7 +8,11 @@ template_manager_api = chalice.app.Blueprint(__name__)
 
 @template_manager_api.route("/", methods=["GET"])
 def list_template_manager_services() -> list[dict[str, str]]:
-    return [{"name": k} for k, v in template_manager.template_managers.items() if v.initialized]
+    return [
+        {"name": k, "template_schema": v.template_structure_cls.model_json_schema()}
+        for k, v in template_manager.template_managers.items()
+        if v.initialized
+    ]
 
 
 @template_manager_api.route("/{service_name}", methods=["GET"])

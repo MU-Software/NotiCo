@@ -12,7 +12,9 @@ class AWSSESSendRawRequest(sendmgr_interface.BaseSendRawRequest):
 
 class AWSSESSendManager(
     sendmgr_interface.SendManagerInterface[
-        sendmgr_interface.BaseSendRequest, AWSSESSendRawRequest, aws_ses_template_mgr.EmailTemplateManager
+        sendmgr_interface.BaseSendRequest,
+        AWSSESSendRawRequest,
+        aws_ses_template_mgr.EmailTemplateManager,
     ]
 ):
     CAN_SEND_RAW_MESSAGE: bool = True

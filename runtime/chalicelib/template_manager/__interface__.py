@@ -32,21 +32,15 @@ class TemplateInformation(pydantic.BaseModel):
         return jinja2.meta.find_undeclared_variables(ast=template)
 
 
-TemplateStructureType = typing.TypeVar("TemplateStructureType", bound=pydantic.BaseModel)
-
-
-class TemplateManagerInterface(typing.Protocol[TemplateStructureType]):
-    template_structure_cls: type[TemplateStructureType] | type[str] | None = None
+class TemplateManagerInterface(typing.Protocol):
+    template_structure_cls: typing.ClassVar[type[pydantic.BaseModel]]
     template_variable_start_end_string: typing.ClassVar[tuple[str, str]] = ("{{", "}}")
 
     @property
     def initialized(self) -> bool: ...
 
     def check_template_valid(self, template_data: type_util.TemplateType) -> bool:
-        if not self.template_structure_cls or self.template_structure_cls == str:
-            return True
-        typing.cast(type[TemplateStructureType], self.template_structure_cls).model_validate(template_data)
-        return True
+        return bool(self.template_structure_cls.model_validate(template_data))
 
     def list(self) -> list[TemplateInformation]: ...
 
@@ -59,9 +53,6 @@ class TemplateManagerInterface(typing.Protocol[TemplateStructureType]):
     def delete(self, code: str) -> None: ...
 
     def render(self, code: str, context: type_util.ContextType) -> type_util.TemplateType: ...
-
-
-S3TemplateStructureType = typing.TypeVar("S3TemplateStructureType", bound=pydantic.BaseModel)
 
 
 @dataclasses.dataclass
