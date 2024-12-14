@@ -1,6 +1,22 @@
 ARG PYTHON_VERSION=3.12
 ARG ARCH=linux/amd64
-FROM --platform=${ARCH} public.ecr.aws/lambda/python:${PYTHON_VERSION}
+
+# ==============================================================================
+# Frontend Builder
+FROM node:22-alpine AS frontend-builder
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+COPY ./frontend /app
+RUN rm -rf /app/node_modules
+WORKDIR /app
+RUN pnpm fetch
+RUN pnpm install -r --offline
+RUN pnpm run build
+
+# ==============================================================================
+FROM --platform=${ARCH} public.ecr.aws/lambda/python:${PYTHON_VERSION} AS runtime
 WORKDIR ${LAMBDA_TASK_ROOT}
 SHELL [ "/bin/bash", "-euxvc"]
 
@@ -9,8 +25,7 @@ ENV PATH="${PATH}:/root/.local/bin:" \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     PYTHONIOENCODING=UTF-8 \
-    PYTHONUNBUFFERED=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+    PYTHONUNBUFFERED=1
 
 # Setup timezone, user, and install dependencies, and clean up
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -18,7 +33,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Copy only the dependencies files to cache them in docker layer
 COPY pyproject.toml poetry.lock ${LAMBDA_TASK_ROOT}
 
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR \
+RUN --mount=type=cache,target=/home/.cache/pypoetry \
     microdnf install gcc -y \
     && curl -sSL https://install.python-poetry.org | python3 - \
     && poetry config virtualenvs.create false  \
@@ -33,7 +48,9 @@ ARG IMAGE_BUILD_DATETIME=unknown
 ENV DEPLOYMENT_IMAGE_BUILD_DATETIME=$IMAGE_BUILD_DATETIME
 
 # Copy main app
-COPY ./chalice-build/deployment/ ${LAMBDA_TASK_ROOT}/
+COPY ./runtime/ ${LAMBDA_TASK_ROOT}/
 
-# The reason for using nobody user is to avoid running the app as root, which can be a security risk.
+# Copy frontend build
+COPY --from=frontend-builder /app/dist ${LAMBDA_TASK_ROOT}/frontend/admin
+
 CMD [ "app.app" ]
