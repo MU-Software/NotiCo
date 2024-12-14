@@ -54,6 +54,7 @@ class FirebaseCloudMessaging(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
 
     @pydantic.field_validator("data", mode="before")
+    @classmethod
     def validate_data(cls, data: dict) -> dict:
         # All keys and values in data must be a string in firebase cloud messaging.
         # We'll try to type cast all values to json compatible string.

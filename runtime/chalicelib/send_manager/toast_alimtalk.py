@@ -20,6 +20,7 @@ def _send_request_to_toast_request_payload(req: sendmgr_interface.SendRequest) -
 
 class ToastAlimtalkSendManager(sendmgr_interface.SendManagerInterface):
     template_manager = toast_alimtalk_template_mgr.toast_alimtalk_template_manager
+    send_request_cls: sendmgr_interface.SendRequest
     client = toast_alimtalk_client.ToastAlimTalkClient()
 
     service_name = "toast_alimtalk"

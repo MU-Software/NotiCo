@@ -61,6 +61,7 @@ class MsgSendRequest(pydantic.BaseModel):
     statsId: str | None = pydantic.Field(max_length=8, default=None)
 
     @pydantic.field_validator("requestDate", mode="before")
+    @classmethod
     def validate_request_date(cls, v: datetime.datetime | None) -> datetime.datetime | None:
         if v and v.date() - datetime.date.today() > datetime.timedelta(days=60):
             raise ValueError("The request date should not be more than 60 days in the future.")

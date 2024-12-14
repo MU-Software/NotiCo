@@ -44,20 +44,26 @@ class TemplateManagerInterface:
             type_util.check_classvar_initialized(cls, ["service_name", "template_structure_cls"])
 
     @property
-    def initialized(self) -> bool: ...
+    def initialized(self) -> bool:
+        raise NotImplementedError("This method must be implemented in the subclass.")
 
     def check_template_valid(self, template_data: TemplateType) -> bool:
         return bool(self.template_structure_cls.model_validate(template_data))
 
-    def list(self) -> list[TemplateInformation]: ...
+    def list(self) -> list[TemplateInformation]:
+        raise NotImplementedError("This method must be implemented in the subclass.")
 
-    def retrieve(self, template_code: str) -> TemplateInformation | None: ...
+    def retrieve(self, template_code: str) -> TemplateInformation | None:
+        raise NotImplementedError("This method must be implemented in the subclass.")
 
-    def create(self, template_code: str, template_data: TemplateType) -> TemplateInformation: ...
+    def create(self, template_code: str, template_data: TemplateType) -> TemplateInformation:
+        raise NotImplementedError("This method must be implemented in the subclass.")
 
-    def update(self, template_code: str, template_data: TemplateType) -> TemplateInformation: ...
+    def update(self, template_code: str, template_data: TemplateType) -> TemplateInformation:
+        raise NotImplementedError("This method must be implemented in the subclass.")
 
-    def delete(self, template_code: str) -> None: ...
+    def delete(self, template_code: str) -> None:
+        raise NotImplementedError("This method must be implemented in the subclass.")
 
     def render(
         self,

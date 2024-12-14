@@ -16,10 +16,12 @@ class SendRequest(pydantic.BaseModel):
 class SendManagerInterface:
     service_name: typing.ClassVar[str]
     template_manager: typing.ClassVar[template_mgr_interface.TemplateManagerInterface]
+    send_request_cls: typing.ClassVar[type[SendRequest]]
 
     initialized: typing.ClassVar[bool]
 
     def __init_subclass__(cls) -> None:
         type_util.check_classvar_initialized(cls, ["service_name", "template_manager"])
 
-    def send(self, request: SendRequest) -> dict[str, str | None]: ...
+    def send(self, request: SendRequest) -> dict[str, str | None]:
+        raise NotImplementedError("This method must be implemented in the subclass.")

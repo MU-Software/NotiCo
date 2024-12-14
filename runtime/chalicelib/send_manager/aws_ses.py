@@ -8,6 +8,7 @@ import chalicelib.template_manager.aws_ses as aws_ses_template_mgr
 
 class AWSSESSendManager(sendmgr_interface.SendManagerInterface):
     template_manager = aws_ses_template_mgr.aws_ses_template_manager
+    send_request_cls = sendmgr_interface.SendRequest
 
     service_name = "aws_ses"
     initialized = True

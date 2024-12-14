@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 class TelegramBotMessagingSender(sendmgr_interface.SendManagerInterface):
     template_manager = telegram_template_mgr.telegram_template_manager
+    send_request_cls: sendmgr_interface.SendRequest
     client = telegram_client.TelegramBotMessagingClient()
 
     service_name = "telegram_botmessaging"
