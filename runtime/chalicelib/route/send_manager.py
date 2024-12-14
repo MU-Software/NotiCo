@@ -11,6 +11,7 @@ send_manager_api.url_prefix = "send-manager"
 
 
 @send_manager_api.route("/", methods=["GET"])
+@chalice_util.api_gateway_desc(summary="List send manager services", description="List all send manager services")
 @chalice_util.exception_catcher
 def list_send_manager_services() -> list[dict[str, str | bool | dict]]:
     return [
@@ -24,6 +25,7 @@ def list_send_manager_services() -> list[dict[str, str | bool | dict]]:
 
 
 @send_manager_api.route("/{service_name}", methods=["POST"])
+@chalice_util.api_gateway_desc(summary="Send message", description="Send message using the service")
 @chalice_util.exception_catcher
 def send_message(service_name: str) -> dict[str, str | None]:
     request: chalice.app.Request = send_manager_api.current_request

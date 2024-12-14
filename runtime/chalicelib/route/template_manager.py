@@ -12,6 +12,10 @@ template_manager_api.url_prefix = "template-manager"
 
 
 @template_manager_api.route("/", methods=["GET"])
+@chalice_util.api_gateway_desc(
+    summary="List template manager services",
+    description="List all template manager services",
+)
 @chalice_util.exception_catcher
 def list_template_manager_services() -> list[dict[str, str]]:
     return [
@@ -25,6 +29,7 @@ def list_template_manager_services() -> list[dict[str, str]]:
 
 
 @template_manager_api.route("/{service_name}", methods=["GET"])
+@chalice_util.api_gateway_desc(summary="List templates", description="List all templates in the service")
 @chalice_util.exception_catcher
 def list_templates(service_name: str) -> list[dict[str, str]]:
     if service_name not in template_manager.template_managers:
@@ -33,6 +38,7 @@ def list_templates(service_name: str) -> list[dict[str, str]]:
 
 
 @template_manager_api.route("/{service_name}/{template_code}", methods=["GET", "POST", "PUT", "DELETE"])
+@chalice_util.api_gateway_desc(summary="CRUD template", description="Create, Read, Update, Delete template")
 @chalice_util.exception_catcher
 def crud_template(service_name: str, template_code: str) -> dict[str, str]:
     request: chalice.app.Request = template_manager_api.current_request
@@ -62,6 +68,7 @@ def crud_template(service_name: str, template_code: str) -> dict[str, str]:
 
 
 @template_manager_api.route("/{service_name}/{template_code}/render", methods=["POST"])
+@chalice_util.api_gateway_desc(summary="Render template", description="Render template with given context")
 @chalice_util.exception_catcher
 def render_template(service_name: str, template_code: str) -> dict[str, str]:
     request: chalice.app.Request = template_manager_api.current_request

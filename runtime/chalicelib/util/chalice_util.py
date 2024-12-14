@@ -6,7 +6,16 @@ import chalice.app
 
 Param = typing.ParamSpec("Param")
 RetType = typing.TypeVar("RetType")
+FuncType = typing.Callable[Param, RetType]
 ReqHandlerType = typing.Callable[[chalice.app.Request], chalice.app.Response]
+
+
+def api_gateway_desc(summary: str, description: str | None = None) -> typing.Callable[[FuncType], FuncType]:
+    def decorator(func: FuncType) -> FuncType:
+        func.__doc__ = f"{summary}\n{description}" if description else summary
+        return func
+
+    return decorator
 
 
 def exception_catcher(func: typing.Callable[Param, RetType]) -> typing.Callable[Param, RetType]:

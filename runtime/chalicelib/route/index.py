@@ -6,6 +6,7 @@ index_api.url_prefix = ""
 
 
 @index_api.route("/service", methods=["GET"])
+@chalice_util.api_gateway_desc(summary="Service identity", description="Get service identity")
 @chalice_util.exception_catcher
 def get_service_identity() -> dict[str, str]:
     return {"service": "notico"}
