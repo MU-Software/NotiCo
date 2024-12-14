@@ -1,15 +1,18 @@
 import chalice.app
+import chalicelib.util.chalice_util as chalice_util
 
 health_check_api = chalice.app.Blueprint(__name__)
-health_check_api.url_prefix = "/health"
+health_check_api.url_prefix = "health"
 
 
 @health_check_api.route("/readyz", methods=["GET"])
+@chalice_util.exception_catcher
 def readyz() -> dict[str, str]:
     return {"status": "ok"}
 
 
 @health_check_api.route("/livez", methods=["GET"])
+@chalice_util.exception_catcher
 def livez() -> dict[str, str]:
     return {"status": "ok"}
 

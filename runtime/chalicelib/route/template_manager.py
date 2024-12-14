@@ -3,14 +3,16 @@ import typing
 import chalice
 import chalice.app
 import chalicelib.template_manager as template_manager
+import chalicelib.util.chalice_util as chalice_util
 
 HttpMethodType = typing.Literal["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD", "TRACE", "CONNECT"]
 
 template_manager_api = chalice.app.Blueprint(__name__)
-template_manager_api.url_prefix = "/template-manager"
+template_manager_api.url_prefix = "template-manager"
 
 
 @template_manager_api.route("/", methods=["GET"])
+@chalice_util.exception_catcher
 def list_template_manager_services() -> list[dict[str, str]]:
     return [
         {
@@ -23,6 +25,7 @@ def list_template_manager_services() -> list[dict[str, str]]:
 
 
 @template_manager_api.route("/{service_name}", methods=["GET"])
+@chalice_util.exception_catcher
 def list_templates(service_name: str) -> list[dict[str, str]]:
     if service_name not in template_manager.template_managers:
         raise chalice.NotFoundError(f"Service {service_name} not found")
@@ -30,6 +33,7 @@ def list_templates(service_name: str) -> list[dict[str, str]]:
 
 
 @template_manager_api.route("/{service_name}/{template_code}", methods=["GET", "POST", "PUT", "DELETE"])
+@chalice_util.exception_catcher
 def crud_template(service_name: str, template_code: str) -> dict[str, str]:
     request: chalice.app.Request = template_manager_api.current_request
     method: HttpMethodType = request.method.upper()
@@ -58,6 +62,7 @@ def crud_template(service_name: str, template_code: str) -> dict[str, str]:
 
 
 @template_manager_api.route("/{service_name}/{template_code}/render", methods=["POST"])
+@chalice_util.exception_catcher
 def render_template(service_name: str, template_code: str) -> dict[str, str]:
     request: chalice.app.Request = template_manager_api.current_request
     requested_content_type: str = request.headers.get("Accept", "text/html")
