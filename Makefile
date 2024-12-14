@@ -66,24 +66,20 @@ stack-s3-deploy:
 stack-lambda-deploy:
 	@DOCKER_TAG=$(TAG_NAME_FOR_PROD) cdk deploy notico-app
 
-stack-deploy: docker-build-prod stack-queue-deploy stack-s3-deploy stack-lambda-deploy
+cleanup-deploy:
+	@rm -rf $(PROJECT_DIR)/cdk.out
+	@rm -rf $(PROJECT_DIR)/chalice.out
+
+stack-deploy: docker-build-prod stack-queue-deploy stack-s3-deploy stack-lambda-deploy cleanup-deploy
 
 # =============================================================================
 # Docker related commands
-
-docker-prebuild:
-	@cd $(PROJECT_DIR)/runtime && chalice package ../chalice-build
-	@cd $(PROJECT_DIR) && unzip -o ./chalice-build/deployment.zip -d ./chalice-build/deployment
-	@rm -f $(PROJECT_DIR)/chalice-build/deployment.zip
-
-docker-postbuild:
-	@rm -rf $(PROJECT_DIR)/chalice-build/
 
 # Docker image build
 # Usage: make docker-build <tag-name:=local>
 # if you want to build with debug mode, set DOCKER_DEBUG=true
 # ex) make docker-build or make docker-build some_TAG_NAME DOCKER_DEBUG=true
-docker-build: docker-prebuild
+docker-build:
 	@docker build \
 		-f ./Dockerfile -t $(IMAGE_NAME):$(TAG_NAME) \
 		--platform linux/amd64 \
@@ -92,7 +88,7 @@ docker-build: docker-prebuild
 		$(DOCKER_MID_BUILD_OPTIONS) $(PROJECT_DIR) $(DOCKER_END_BUILD_OPTIONS)
 
 # Build docker image and push to ECR
-docker-build-prod: stack-ecr-deploy docker-prebuild
+docker-build-prod: stack-ecr-deploy
 	@aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
 	@docker build \
 		-f ./Dockerfile -t $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(IMAGE_NAME):$(TAG_NAME_FOR_PROD) \
