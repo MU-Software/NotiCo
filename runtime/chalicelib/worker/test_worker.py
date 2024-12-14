@@ -5,15 +5,14 @@ import chalice.app
 if typing.TYPE_CHECKING:
     import mypy_boto3_sqs.type_defs
 
+    type RecordType = "mypy_boto3_sqs.type_defs.MessageTypeDef"
+else:
+    type RecordType = dict[str, typing.Any]
 
-def test_handler(
-    app: chalice.app.Chalice,
-    record: "mypy_boto3_sqs.type_defs.MessageTypeDef",
-) -> "mypy_boto3_sqs.type_defs.MessageTypeDef":
+
+def test_handler(app: chalice.app.Chalice, record: RecordType) -> RecordType:
     print(record)
     return record
 
 
-worker_patterns = {
-    "test_handler": test_handler,
-}
+workers = [test_handler]

@@ -1,0 +1,185 @@
+<html lang="ko-kr">
+
+<head>
+  <meta charset="utf-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      height: initial;
+      min-height: initial;
+      max-height: initial;
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .telegram-botmessaging-main {
+      background: linear-gradient(
+        120deg,
+        rgb(201, 213, 117),
+        rgb(68, 173, 128) 45% 55%,
+        rgb(206, 217, 173));
+      height: 40rem;
+      aspect-ratio: 1/2;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .telegram-botmessaging-main * {
+      font-size: 0.75rem;
+    }
+
+    .telegram-botmessaging-header {
+      padding: 0.25rem;
+      width: 100%;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .telegram-botmessaging-header-button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .telegram-botmessaging-header-list-button-bubble {
+      padding: 0.1rem 0.5rem;
+      border-radius: 100rem;
+      background-color: #007cfd;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .telegram-botmessaging-header-title {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .telegram-botmessaging-header-title h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .telegram-botmessaging-header-title p {
+      margin: 0;
+      color: #7f91a4;
+    }
+
+    .telegram-botmessaging-telegram-botmessaging-message-list {
+      width: 100%;
+      height: 100%;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 0.5rem;
+    }
+
+    .telegram-botmessaging-message-date-container {
+      width: 100%;
+      margin: 0.5rem 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .telegram-botmessaging-message-date {
+      display: flex;
+      justify-content: center;
+      background-color: rgb(31, 158, 93);
+      border-radius: 100rem;
+      width: fit-content;
+      padding: 0.25rem 0.75rem;
+      color: #fff;
+    }
+
+    .telegram-botmessaging-message-container {
+      max-width: 20rem;
+      position: relative;
+      align-self: flex-start;
+      padding: 0.4rem 0.75rem;
+      margin-left: 0.5rem;
+      border-radius: 1rem 1rem 1rem 0.5rem;
+      background-color: #fff;
+
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .telegram-botmessaging-message-container::before {
+      content: '';
+      position: absolute;
+      left: -0.22rem;
+      transform: rotate(80deg);
+      bottom: 3%;
+      border-top: 4px solid transparent;
+      border-right: 8px solid #fff;
+      border-bottom: 4px solid transparent;
+    }
+
+    .telegram-botmessaging-message-text {
+      width: fit-content;
+      justify-self: flex-start;
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      white-space: pre-wrap;
+    }
+
+    .telegram-botmessaging-message-time {
+      text-align: end;
+      flex-grow: 1;
+      line-height: 0;
+      padding-left: 0.25rem;
+      font-size: 0.7rem;
+      color: #7f91a4;
+      transform: translateY(-0.2rem);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="telegram-botmessaging-main">
+    <div class="telegram-botmessaging-header">
+      <div class="telegram-botmessaging-header-button">
+        <svg focusable="false" viewBox="9 0 9 24" width="1.25rem" height="2.25rem">
+          <path fill="#007cfd" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+        </svg>
+        <div class="telegram-botmessaging-header-list-button-bubble">11</div>
+      </div>
+      <div class="telegram-botmessaging-header-title">
+        <h2>NotiCo</h2>
+        <p>bot</p>
+      </div>
+      <div class="telegram-botmessaging-header-button">
+        <svg focusable="false" viewBox="2 2 20 20" width="2.25rem" height="2.25rem">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6m0 14c-2.03 0-4.43-.82-6.14-2.88C7.55 15.8 9.68 15 12 15s4.45.8 6.14 2.12C16.43 19.18 14.03 20 12 20" />
+        </svg>
+      </div>
+    </div>
+
+    <div class="telegram-botmessaging-telegram-botmessaging-message-list">
+      <div class="telegram-botmessaging-message-container">
+        <div class="telegram-botmessaging-message-text">{{ body }}</div>
+        <div class="telegram-botmessaging-message-time">2:34 PM</div>
+      </div>
+      <div class="telegram-botmessaging-message-date-container">
+        <div class="telegram-botmessaging-message-date">September 23</div>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>

@@ -6,26 +6,11 @@ import chalicelib.send_manager.__interface__ as sendmgr_interface
 import chalicelib.template_manager.aws_ses as aws_ses_template_mgr
 
 
-class AWSSESSendRawRequest(sendmgr_interface.BaseSendRawRequest):
-    personalized_content: dict[str, aws_ses_template_mgr.EmailTemplateManager.TemplateStructure]
+class AWSSESSendManager(sendmgr_interface.SendManagerInterface):
+    template_manager = aws_ses_template_mgr.aws_ses_template_manager
 
-
-class AWSSESSendManager(
-    sendmgr_interface.SendManagerInterface[
-        sendmgr_interface.BaseSendRequest,
-        AWSSESSendRawRequest,
-        aws_ses_template_mgr.EmailTemplateManager,
-    ]
-):
-    CAN_SEND_RAW_MESSAGE: bool = True
-
-    @property
-    def initialized(self) -> bool:
-        return True
-
-    @property
-    def template_manager(self) -> aws_ses_template_mgr.EmailTemplateManager:
-        return aws_ses_template_mgr.email_template_manager
+    service_name = "aws_ses"
+    initialized = True
 
     def _send_email(self, from_: str, to_: str, title: str, body: str) -> str:
         try:
@@ -46,14 +31,14 @@ class AWSSESSendManager(
                 return e.response.get("Error", {}).get("Message", err_tb)
             return err_tb
 
-    def send(self, request: sendmgr_interface.SendRequestType) -> dict[str, str]:
+    def send(self, request: sendmgr_interface.SendRequest) -> dict[str, str]:
         result: dict[str, str] = {}
 
         for receiver, personalized_context in request.personalized_context.items():
             context = request.shared_context | personalized_context
-            render_result = self.template_manager.render(code=request.template_code, context=context)
+            render_result = self.template_manager.render(template_code=request.template_code, context=context)
             result[receiver] = self._send_email(
-                from_=render_result["from_address"],
+                from_=render_result["from_"],
                 to_=receiver,
                 title=render_result["title"],
                 body=render_result["body"],
@@ -61,12 +46,6 @@ class AWSSESSendManager(
 
         return result
 
-    def send_raw(self, request: AWSSESSendRawRequest) -> dict[str, str | None]:
-        content_set = request.personalized_content.items()
-        return {r: self._send_email(from_=c.from_, to_=r, title=c.title, body=c.body) for r, c in content_set}
-
 
 aws_ses_send_manager = AWSSESSendManager()
-send_manager_patterns: dict[str, sendmgr_interface.SendManagerInterface] = {
-    "aws_ses": aws_ses_send_manager,
-}
+send_managers = [aws_ses_send_manager]

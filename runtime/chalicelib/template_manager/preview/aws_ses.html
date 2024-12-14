@@ -1,0 +1,165 @@
+<html lang="ko-kr">
+
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      height: 100%;
+      min-height: initial;
+      max-height: initial;
+      margin: 0;
+      padding: 0;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .email-main {
+      height: 100%;
+      min-height: initial;
+      max-height: initial;
+      padding: 0.5rem;
+      background-color: #fff;
+    }
+
+    .email-table {
+      width: 100%;
+      height: 100%;
+    }
+
+    .email-avatar-column {
+      width: 4rem;
+      vertical-align: top;
+    }
+
+    .email-avatar-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .email-avatar-container > svg {
+      width: 3rem;
+      height: 3rem;
+      transform: translate(0, -0.25rem);
+      fill: #a0c3ff;
+    }
+
+    .email-datetime-menu-column {
+      width: 15rem;
+      vertical-align: top;
+    }
+
+    .email-title {
+      margin: 1rem 0 0.5rem 0;
+    }
+
+    .email-from-to-column {
+      width: calc(100% - 15rem - 1rem);
+    }
+
+    .email-to-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.5rem;
+    }
+
+    .email-to {
+      color: #777;
+      font-size: 0.85rem;
+    }
+
+    .email-to-icon {
+      width: 1rem;
+      height: 1rem;
+      fill: #777;
+      transform: translateY(0.1rem);
+    }
+
+    .email-datetime {
+      color: #999;
+      font-size: 0.75rem;
+    }
+
+    .email-datetime-menu-container {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .email-datetime-menu-container > * {
+      flex-shrink: 0;
+    }
+
+    .email-menu-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      fill: #777;
+    }
+
+    .email-body-row {
+      height: 100%;
+    }
+
+    .email-body-column {
+      vertical-align: top;
+    }
+
+    .email-body {
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="email-main">
+    <table class="email-table">
+      <tbody>
+        <tr>
+          <td class="email-avatar-column"></td>
+          <td class="email-from-to-column" colspan="2"><h3 class="email-title">{{ title }}</h3></td>
+        </tr>
+        <tr>
+          <td class="email-avatar-column" rowspan="3">
+            <div class="email-avatar-container">
+              <svg focusable="false" viewBox="2 2 20 20">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6m0 14c-2.03 0-4.43-.82-6.14-2.88C7.55 15.8 9.68 15 12 15s4.45.8 6.14 2.12C16.43 19.18 14.03 20 12 20" />
+              </svg>
+            </div>
+          </td>
+          <td class="email-from-to-column">{{ from_ }}</td>
+          <td class="email-datetime-menu-column" rowspan="2">
+            <div class="email-datetime-menu-container">
+              <div class="email-datetime">2024. 9. 30. 오전 9:39</div>
+              <svg class="email-menu-icon" focusable="false" viewBox="0 0 24 24">
+                <path d="m22 9.24-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28z" />
+              </svg>
+              <svg class="email-menu-icon" focusable="false" viewBox="0 0 24 24">
+                <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11" />
+              </svg>
+              <svg class="email-menu-icon" focusable="false" viewBox="0 0 24 24">
+                <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2m0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2" />
+              </svg>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="email-from-to-column">
+            <div class="email-to-container">
+              <div class="email-to">{{ send_to }}에게</div>
+              <svg class="email-to-icon" focusable="false" viewBox="0 10 24 10"><path d="m7 10 5 5 5-5z" /></svg>
+            </div>
+          </td>
+        </tr>
+        <tr class="email-body-row">
+          <td class="email-body-column" colspan="2">
+            <span>{{ body }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+</body>
+
+</html>

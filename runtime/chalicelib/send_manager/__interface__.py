@@ -7,30 +7,19 @@ import chalicelib.util.type_util as type_util
 import pydantic
 
 
-class BaseSendRequest(pydantic.BaseModel):
+class SendRequest(pydantic.BaseModel):
     template_code: str
     shared_context: type_util.ContextType
     personalized_context: dict[str, type_util.ContextType]
 
 
-class BaseSendRawRequest(pydantic.BaseModel):
-    personalized_content: dict[str, type_util.ContextType]
+class SendManagerInterface:
+    service_name: typing.ClassVar[str]
+    template_manager: typing.ClassVar[template_mgr_interface.TemplateManagerInterface]
 
+    initialized: typing.ClassVar[bool]
 
-SendRequestType = typing.TypeVar("SendRequestType", bound=BaseSendRequest)
-SendRawRequestType = typing.TypeVar("SendRawRequestType", bound=BaseSendRawRequest)
-TemplateManagerType = typing.TypeVar("TemplateManagerType", bound=template_mgr_interface.TemplateManagerInterface)
+    def __init_subclass__(cls) -> None:
+        type_util.check_classvar_initialized(cls, ["service_name", "template_manager"])
 
-
-class SendManagerInterface[SendRequestType, SendRawRequestType, TemplateManagerType](typing.Protocol):
-    CAN_SEND_RAW_MESSAGE: typing.ClassVar[bool] = False
-
-    @property
-    def initialized(self) -> bool: ...
-
-    @property
-    def template_manager(self) -> TemplateManagerType: ...
-
-    def send(self, request: SendRequestType) -> dict[str, str | None]: ...
-
-    def send_raw(self, request: SendRawRequestType) -> dict[str, str | None]: ...
+    def send(self, request: SendRequest) -> dict[str, str | None]: ...

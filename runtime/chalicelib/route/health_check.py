@@ -1,6 +1,7 @@
 import chalice.app
 
 health_check_api = chalice.app.Blueprint(__name__)
+health_check_api.url_prefix = "/health"
 
 
 @health_check_api.route("/readyz", methods=["GET"])
@@ -13,4 +14,4 @@ def livez() -> dict[str, str]:
     return {"status": "ok"}
 
 
-blueprints: dict[str, chalice.app.Blueprint] = {"/health": health_check_api}
+blueprints: list[chalice.app.Blueprint] = [health_check_api]

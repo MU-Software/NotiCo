@@ -1,7 +1,8 @@
 import typing
 
-import chalicelib.aws_resource as aws_resource
-import chalicelib.template_manager.__interface__ as template_mgr_interface
+import chalicelib.config as config_module
+import chalicelib.external_api.__interface__ as external_api_interface
+import chalicelib.util.decorator_util as decorator_util
 import pydantic
 
 
@@ -248,43 +249,15 @@ class TelegramSendMessageRequestPayload(pydantic.BaseModel):
     ) = None
 
 
-class SimplifiedTelegramTemplate(pydantic.BaseModel):
-    class Button(pydantic.BaseModel):
-        text: str
-        url: str
-
-        def to_telegram_button(self) -> TelegramInlineKeyboardButton:
-            return TelegramInlineKeyboardButton(text=self.text, url=self.url)
-
-    body: str
-    entities: list[TelegramMessageEntity]
-    buttons: list[list[Button]]
-
-    def to_send_message_request_payload(self, chat_id: int | str) -> TelegramSendMessageRequestPayload:
-        return TelegramSendMessageRequestPayload(
-            chat_id=chat_id,
-            text=self.body,
-            parse_mode="MarkdownV2",
-            entities=self.entities or None,
-            reply_markup=(
-                TelegramInlineKeyboardMarkup(
-                    inline_keyboard=[[b.to_telegram_button() for b in bs] for bs in self.buttons]
-                )
-                if self.buttons
-                else None
-            ),
-            link_preview_options=TelegramLinkPreviewOptions(is_disabled=True),
-            protect_content=False,
-            disable_notification=False,
-            allow_paid_broadcast=False,
-        )
+class TelegramBotMessagingError(Exception):
+    pass
 
 
-class TelegramTemplateManager(template_mgr_interface.S3ResourceTemplateManager):
-    service_name = "telegram_botmessaging"
-    template_structure_cls = SimplifiedTelegramTemplate
-    resource = aws_resource.S3ResourcePath.telegram_template
+class TelegramBotMessagingClient(external_api_interface.ExternalClientInterface):
+    exc_cls = TelegramBotMessagingError
+    config = config_module.config.telegram
 
-
-telegram_template_manager = TelegramTemplateManager()
-template_managers = [telegram_template_manager]
+    @decorator_util.retry
+    def send_message(self, payload: TelegramSendMessageRequestPayload) -> str:
+        response = self.session.post(url="/sendMessage", json=payload.model_dump(mode="json")).raise_for_status()
+        return typing.cast(dict, typing.cast(dict, response.json()).get("result", {})).get("message_id", "")

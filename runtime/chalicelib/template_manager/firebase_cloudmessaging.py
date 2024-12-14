@@ -8,11 +8,10 @@ class FirebaseTemplateManager(template_mgr_interface.S3ResourceTemplateManager):
         title: str
         body: str
 
+    service_name = "firebase_cloudmessaging"
     template_structure_cls = TemplateStructure
     resource = aws_resource.S3ResourcePath.firebase_template
 
 
 firebase_cloudmessaging_template_manager = FirebaseTemplateManager()
-template_manager_patterns: dict[str, template_mgr_interface.TemplateManagerInterface] = {
-    "firebase_cloudmessaging": firebase_cloudmessaging_template_manager,
-}
+template_managers = [firebase_cloudmessaging_template_manager]

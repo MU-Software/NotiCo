@@ -9,28 +9,27 @@ import chalicelib.util.import_util as import_util
 if typing.TYPE_CHECKING:
     import mypy_boto3_sqs.type_defs
 
-    SQSEventType = typing.TypedDict("SQSEventType", {"Records": list["mypy_boto3_sqs.type_defs.MessageTypeDef"]})
+    type RecordType = "mypy_boto3_sqs.type_defs.MessageTypeDef"
 else:
-    SQSEventType = dict[str, typing.Any]
+    type RecordType = dict[str, typing.Any]
 
-_WorkerCollectionType = dict[str, typing.Callable[[chalice.app.Chalice, chalice.app.SQSEvent], dict[str, typing.Any]]]
-workers: _WorkerCollectionType = {}
-
-for _path in pathlib.Path(__file__).parent.glob("*.py"):
-    if _path.stem.startswith("__") or not (
-        _patterns := typing.cast(
-            _WorkerCollectionType,
-            getattr(import_util.load_module(_path), "worker_patterns", None),
-        )
-    ):
-        continue
-
-    if _duplicated := workers.keys() & _patterns.keys():
-        raise ValueError(f"Worker {_duplicated} is already registered")
-    workers.update(_patterns)
+SQSEventType = typing.TypedDict("SQSEventType", {"Records": list[RecordType]})
+WorkerType = typing.Callable[[chalice.app.Chalice, RecordType], dict[str, typing.Any]]
 
 
 def register_worker(app: chalice.app.Chalice) -> None:
+    workers: dict[str, WorkerType] = {}
+
+    for _workers in typing.cast(
+        list[list[WorkerType]],
+        import_util.auto_import_patterns(pattern="workers", file_prefix="", dir=pathlib.Path(__file__).parent),
+    ):
+        _func_names = {worker.__name__ for worker in _workers}
+        if _duplicated := _func_names & workers.keys():
+            raise ValueError(f"Worker {_duplicated} is already registered")
+
+        workers.update({worker.__name__: worker for worker in _workers})
+
     @app.on_sqs_message(queue=config_module.config.infra.queue_name)
     def sqs_handler(event: chalice.app.SQSEvent) -> list[dict[str, typing.Any]]:
         parsed_event: SQSEventType = event.to_dict()

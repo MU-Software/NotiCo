@@ -6,6 +6,7 @@ import typing
 import urllib.parse
 
 import chalicelib.config as config_module
+import chalicelib.external_api.__interface__ as external_api_interface
 import chalicelib.util.decorator_util as decorator_util
 import httpx
 import pydantic
@@ -239,19 +240,16 @@ class ToastAlimTalkError(Exception):
     pass
 
 
-class ToastAlimTalkClient(pydantic.BaseModel):
-    exc_cls: type[Exception] = ToastAlimTalkError
-
-    @functools.cached_property
-    def config(self) -> config_module.ToastConfig:
-        return config_module.config.toast
+class ToastAlimTalkClient(external_api_interface.ExternalClientInterface):
+    exc_cls = ToastAlimTalkError
+    config = config_module.config.toast
 
     @functools.cached_property
     def session(self) -> httpx.Client:
-        if not config_module.config.toast.is_configured():
-            raise ToastAlimTalkError("Toast configuration is not set up properly.")
+        if not self.config.is_configured():
+            raise self.exc_cls("Toast configuration is not set up properly.")
 
-        return config_module.config.toast.get_session("alimtalk")
+        return self.config.get_session("alimtalk")
 
     @decorator_util.retry
     def send_alimtalk(self, payload: MsgSendRequest | RawMsgSendRequest) -> MsgSendResponse:
