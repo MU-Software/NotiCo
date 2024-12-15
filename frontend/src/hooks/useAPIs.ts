@@ -118,7 +118,7 @@ export const useListTemplatesQuery = (serviceName: string) =>
 export const useSendManagerServicesQuery = () =>
   useSuspenseQuery({
     queryKey: QUERY_KEYS.LIST_SEND_MANAGER_SERVICE,
-    queryFn: () => LocalRequest<SendManagerListResponse>({ route: 'api/v1/send-manager', method: 'GET' }),
+    queryFn: () => LocalRequest<SendManagerListResponse[]>({ route: 'api/v1/send-manager', method: 'GET' }),
   })
 // ==================== Mutation Hooks ====================
 export const useCreateTemplateMutation = () =>
