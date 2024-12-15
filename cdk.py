@@ -188,6 +188,9 @@ class NotiCoApp(aws_cdk.Stack):
         app_default_role = app.get_role("DefaultRole")
         queue.grant_consume_messages(grantee=app_default_role)
         s3_bucket.grant_read(identity=app_default_role)
+        s3_bucket.grant_write(identity=app_default_role)
+        s3_bucket.grant_put(identity=app_default_role)
+        s3_bucket.grant_delete(identity=app_default_role)
         app_default_role.add_to_principal_policy(
             statement=aws_cdk.aws_iam.PolicyStatement(
                 actions=["ses:SendEmail", "SES:SendRawEmail"],
