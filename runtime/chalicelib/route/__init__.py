@@ -24,7 +24,9 @@ def register_blueprints(app: chalice.app.Chalice) -> None:
 
             app.register_blueprint(blueprint=bp, url_prefix=f"/api/v1/{bp.url_prefix}")
 
-    @app.route("/", methods=["GET"])
+    @app.route(path="/", methods=["GET"])
+    @app.route(path="/template-manager", methods=["GET"])
+    @app.route(path="/send-manager", methods=["GET"])
     def get_admin_frontend() -> str:
         if not FRONTEND_ADMIN_PATH.exists():
             raise chalice.app.NotFoundError("Admin frontend not found")
