@@ -1,16 +1,10 @@
 import functools
 import typing
 
+import chalice.app
 import chalicelib.send_manager as send_manager
 import chalicelib.send_manager.__interface__ as send_mgr_interface
 import pydantic
-
-if typing.TYPE_CHECKING:
-    import mypy_boto3_sqs.type_defs
-
-    type RecordType = "mypy_boto3_sqs.type_defs.MessageTypeDef"
-else:
-    type RecordType = dict[str, typing.Any]
 
 
 class WorkerPayload(pydantic.BaseModel):
@@ -41,8 +35,13 @@ class WorkerPayload(pydantic.BaseModel):
         return self.send_manager.send(self.send_request_payload)
 
 
-def notification_sender(record: RecordType) -> dict[str, str]:
-    return WorkerPayload.model_validate_json(record["body"]).send()
+class SQSRecordBody(pydantic.BaseModel):
+    worker: str
+    worker_payload: WorkerPayload
+
+
+def notification_sender(record: chalice.app.SQSRecord) -> dict[str, str]:
+    return SQSRecordBody.model_validate_json(record.body).worker_payload.send()
 
 
 workers = [notification_sender]

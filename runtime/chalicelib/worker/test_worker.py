@@ -1,15 +1,10 @@
-import typing
+import json
 
-if typing.TYPE_CHECKING:
-    import mypy_boto3_sqs.type_defs
-
-    type RecordType = "mypy_boto3_sqs.type_defs.MessageTypeDef"
-else:
-    type RecordType = dict[str, typing.Any]
+import chalice.app
 
 
-def test_handler(record: RecordType) -> RecordType:
-    print(record)
+def test_handler(record: chalice.app.SQSRecord) -> chalice.app.SQSRecord:
+    print(record.to_dict(), json.loads(record.body))
     return record
 
 
