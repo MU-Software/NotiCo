@@ -14,14 +14,7 @@ send_manager_api.url_prefix = "send-manager"
 @chalice_util.api_gateway_desc(summary="List send manager services", description="List all send manager services")
 @chalice_util.exception_catcher
 def list_send_manager_services() -> list[dict[str, str | bool | dict]]:
-    return [
-        {
-            "name": v.service_name,
-            "template_schema": v.template_manager.template_structure_cls.model_json_schema(),
-        }
-        for v in send_manager.send_managers.values()
-        if v.initialized
-    ]
+    return [v.describe() for v in send_manager.send_managers.values() if v.initialized]
 
 
 @send_manager_api.route("/{service_name}", methods=["POST"])

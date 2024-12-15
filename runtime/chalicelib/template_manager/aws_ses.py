@@ -10,6 +10,7 @@ class AWSSESTemplateManager(template_mgr_interface.S3ResourceTemplateManager):
         body: str
 
     service_name = "aws_ses"
+    permission = template_mgr_interface.TemplateManagerPermission()
     template_structure_cls = TemplateStructure
     resource = aws_resource.S3ResourcePath.email_template
 

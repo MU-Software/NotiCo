@@ -38,6 +38,7 @@ class SimplifiedTelegramTemplate(pydantic.BaseModel):
 
 class TelegramTemplateManager(template_mgr_interface.S3ResourceTemplateManager):
     service_name = "telegram_botmessaging"
+    permission = template_mgr_interface.TemplateManagerPermission()
     template_structure_cls = SimplifiedTelegramTemplate
     resource = aws_resource.S3ResourcePath.telegram_template
 

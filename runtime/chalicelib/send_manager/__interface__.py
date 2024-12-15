@@ -23,5 +23,11 @@ class SendManagerInterface:
     def __init_subclass__(cls) -> None:
         type_util.check_classvar_initialized(cls, ["service_name", "template_manager"])
 
+    def describe(self) -> dict[str, typing.Any]:
+        return {
+            "name": self.service_name,
+            "template_schema": self.template_manager.template_structure_cls.model_json_schema(),
+        }
+
     def send(self, request: SendRequest) -> dict[str, str | None]:
         raise NotImplementedError("This method must be implemented in the subclass.")

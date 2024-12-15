@@ -34,18 +34,34 @@ class TemplateInformation(pydantic.BaseModel):
         )
 
 
+class TemplateManagerPermission(pydantic.BaseModel):
+    list: bool = True
+    retrieve: bool = True
+    create: bool = True
+    update: bool = True
+    delete: bool = True
+
+
 class TemplateManagerInterface:
     service_name: typing.ClassVar[str]
+    permission: typing.ClassVar[TemplateManagerPermission]
     template_structure_cls: typing.ClassVar[type[pydantic.BaseModel]]
     template_variable_start_end_string: typing.ClassVar[tuple[str, str]] = ("{{", "}}")
 
     def __init_subclass__(cls, check_classvar_initialized: bool = True) -> None:
         if check_classvar_initialized:
-            type_util.check_classvar_initialized(cls, ["service_name", "template_structure_cls"])
+            type_util.check_classvar_initialized(cls, ["service_name", "permission", "template_structure_cls"])
 
     @property
     def initialized(self) -> bool:
         raise NotImplementedError("This method must be implemented in the subclass.")
+
+    def describe(self) -> dict[str, typing.Any]:
+        return {
+            "name": self.service_name,
+            "template_schema": self.template_structure_cls.model_json_schema(),
+            "permission": self.permission.model_dump(mode="json"),
+        }
 
     def check_template_valid(self, template_data: TemplateType) -> bool:
         return bool(self.template_structure_cls.model_validate(template_data))

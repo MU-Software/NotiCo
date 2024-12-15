@@ -9,6 +9,7 @@ import chalicelib.template_manager.__interface__ as template_mgr_interface
 
 class ToastAlimtalkTemplateManager(template_mgr_interface.TemplateManagerInterface):
     service_name = "toast_alimtalk"
+    permission = template_mgr_interface.TemplateManagerPermission(create=False, update=False, delete=False)
     template_structure_cls = toast_alimtalk_client.Template
     template_variable_start_end_string: typing.ClassVar[tuple[str, str]] = ("#{", "}")
 

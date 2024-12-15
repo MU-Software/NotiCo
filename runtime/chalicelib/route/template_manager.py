@@ -18,14 +18,7 @@ template_manager_api.url_prefix = "template-manager"
 )
 @chalice_util.exception_catcher
 def list_template_manager_services() -> list[dict[str, str]]:
-    return [
-        {
-            "name": v.service_name,
-            "template_schema": v.template_structure_cls.model_json_schema(),
-        }
-        for v in template_manager.template_managers.values()
-        if v.initialized
-    ]
+    return [v.describe() for v in template_manager.template_managers.values() if v.initialized]
 
 
 @template_manager_api.route("/{service_name}", methods=["GET"])

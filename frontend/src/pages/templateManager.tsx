@@ -21,6 +21,11 @@ type TemplateEditorStateType = {
   isFormSaved?: boolean
   previewHTML?: string
 }
+type TemplateEditorProps = {
+  service: ServiceDefType
+  template?: TemplateDefType
+  disabled?: boolean
+}
 
 const TabPanel: React.FC<React.PropsWithChildren<{ value: number; index: number }>> = ({ children, value, index }) => (
   <div hidden={value !== index}>{value === index && <Box sx={{ p: 3 }}>{children}</Box>}</div>
@@ -48,11 +53,6 @@ const convertTemplateVarToUISchema: (_: { vars: string[] }) => UiSchema = ({ var
   return { ...acc, ...(uiSchemaInfo && { [v]: uiSchemaInfo }) }
 }, { 'ui:title': '', 'ui:order': ['template_code', '*'] })
 
-type TemplateEditorProps = {
-  service: ServiceDefType
-  template?: TemplateDefType
-  disabled?: boolean
-}
 const TemplateEditor: React.FC<TemplateEditorProps> = ({ service, template, disabled }) => {
   const previewRef = React.useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
@@ -65,7 +65,10 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({ service, template, disa
   })
   const addSnackbar = (c: string | React.ReactNode, v: VariantType) => enqueueSnackbar(c, getDefaultSnackOption(v))
 
-  React.useEffect(() => setState(({})), [service])
+  React.useEffect(() => setState({
+    formData: template ? { ...template.template, template_code: template.template_code } : undefined,
+    isFormSaved: template !== undefined
+  }), [service, template])
   React.useEffect(() => setState(ps => ({
     ...ps,
     formData: template ? { ...template.template, template_code: template.template_code } : undefined,
@@ -125,45 +128,62 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({ service, template, disa
     )
   }
 
+  const hasCreatePermission = template ? true : service.permission.create
+  const hasUpdatePermission = template ? service.permission.update : true
   const isPending = disabled || createTemplateMutation.isPending || updateTemplateMutation.isPending || renderPreviewHTMLMutation.isPending
   const isPreviewAvailable = state.isFormSaved && !isPending
+
+  if (!hasCreatePermission) return <Typography>
+    템플릿을 추가할 수 없습니다,<br />
+    추가하시려면 메뉴얼을 참고하시거나 담당자한테 문의해주세요.
+  </Typography>
 
   return <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={2}>
     <Box sx={{ width: "100%" }}>
       <Typography variant="h5"><b>편집기</b></Typography>
-      <Form
-        schema={{
-          ...service.template_schema,
-          required: [...service.template_schema.required ?? [], 'template_code'],
-          properties: {
-            ...service.template_schema.properties,
-            template_code: {
-              type: 'string',
-              title: '템플릿 코드',
-              readOnly: template !== undefined,
-            },
-          },
-        }}
-        validator={validator}
-        formData={state.formData}
-        uiSchema={convertTemplateVarToUISchema({ vars: Object.keys(service.template_schema.properties ?? {}) })}
-        liveValidate
-        focusOnFirstError
-        showErrorList="bottom"
-        onChange={change}
-        onSubmit={submit}
-        onError={(errors) => console.log('errors', errors)}
-        disabled={isPending}
-      >
-        <Stack direction="row" spacing={2} sx={{ justifyContent: 'space-between', margin: '0 0 0.5rem 0' }}>
-          <Button disabled={isPending} variant="contained" type="submit">{template ? '수정' : '추가'}</Button>
-          {
-            state.isFormSaved
-            ? <Button disabled={!isPreviewAvailable} variant="contained" color="success" onClick={preview}>미리보기</Button>
-            : <Tooltip title="템플릿을 먼저 저장해주세요."><Box><Button variant="contained" disabled>미리보기</Button></Box></Tooltip>
-          }
-        </Stack>
-      </Form>
+      {
+        !hasUpdatePermission
+          ? <Stack>
+            <Typography>
+              템플릿을 수정할 수는 없으나, 미리볼 수는 있습니다,<br />
+              수정하시려면 메뉴얼을 참고하시거나 담당자한테 문의해주세요.<br />
+            </Typography>
+            <Button disabled={!isPreviewAvailable} variant="contained" color="success" onClick={preview}>미리보기</Button>
+          </Stack>
+          : <Form
+            schema={{
+              ...service.template_schema,
+              required: [...service.template_schema.required ?? [], 'template_code'],
+              properties: {
+                ...service.template_schema.properties,
+                template_code: {
+                  type: 'string',
+                  title: '템플릿 코드',
+                  readOnly: template !== undefined,
+                },
+              },
+            }}
+            validator={validator}
+            formData={state.formData}
+            uiSchema={convertTemplateVarToUISchema({ vars: Object.keys(service.template_schema.properties ?? {}) })}
+            liveValidate
+            focusOnFirstError
+            showErrorList="bottom"
+            onChange={change}
+            onSubmit={submit}
+            onError={(errors) => console.log('errors', errors)}
+            disabled={isPending}
+          >
+            <Stack direction="row" spacing={2} sx={{ justifyContent: 'space-between', margin: '0 0 0.5rem 0' }}>
+              <Button disabled={isPending} variant="contained" type="submit">{template ? '수정' : '추가'}</Button>
+              {
+                state.isFormSaved
+                  ? <Button disabled={!isPreviewAvailable} variant="contained" color="success" onClick={preview}>미리보기</Button>
+                  : <Tooltip title="템플릿을 먼저 저장해주세요."><Box><Button variant="contained" disabled>미리보기</Button></Box></Tooltip>
+              }
+            </Stack>
+          </Form>
+      }
     </Box>
     <Box sx={{ width: "100%" }}>
       <Typography variant="h5"><b>미리보기</b></Typography>

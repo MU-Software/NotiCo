@@ -6,13 +6,18 @@ export type APIErrorResponseType = {
 
 export type ServiceDefType = {
   name: string
+  permission: TemplateManagerPermissionType
   template_schema: RJSFSchema
 }
 
-export type TemplateMangerServiceListResponse = {
-  name: string
-  template_schema: Record<string, unknown>
-}[]
+export type TemplateManagerPermissionType = {
+  list: boolean
+  retrieve: boolean
+  create: boolean
+  update: boolean
+  delete: boolean
+}
+export type TemplateMangerServiceListResponse = ServiceDefType[]
 
 export type TemplateDefType = {
   template_code: string
@@ -42,6 +47,10 @@ export type TemplateManagerRenderJSONResponse = {
 }
 export type TemplateManagerRenderHTMLResponse = string
 
+export type SendManagerListResponse = {
+  name: string
+  template_schema: RJSFSchema
+}
 export type SendRequestType = {
   service_name: string
   template_code: string

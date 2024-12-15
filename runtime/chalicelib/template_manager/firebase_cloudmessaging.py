@@ -9,6 +9,7 @@ class FirebaseTemplateManager(template_mgr_interface.S3ResourceTemplateManager):
         body: str
 
     service_name = "firebase_cloudmessaging"
+    permission = template_mgr_interface.TemplateManagerPermission()
     template_structure_cls = TemplateStructure
     resource = aws_resource.S3ResourcePath.firebase_template
 
