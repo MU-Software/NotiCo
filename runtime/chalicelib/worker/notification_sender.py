@@ -1,7 +1,6 @@
 import functools
 import typing
 
-import chalice.app
 import chalicelib.send_manager as send_manager
 import chalicelib.send_manager.__interface__ as send_mgr_interface
 import pydantic
@@ -42,7 +41,7 @@ class WorkerPayload(pydantic.BaseModel):
         return self.send_manager.send(self.send_request_payload)
 
 
-def notification_sender(app: chalice.app.Chalice, record: RecordType) -> dict[str, str]:
+def notification_sender(record: RecordType) -> dict[str, str]:
     return WorkerPayload.model_validate_json(record["body"]).send()
 
 
