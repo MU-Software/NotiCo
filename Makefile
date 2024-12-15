@@ -69,6 +69,7 @@ stack-lambda-deploy:
 cleanup-deploy:
 	@rm -rf $(PROJECT_DIR)/cdk.out
 	@rm -rf $(PROJECT_DIR)/chalice.out
+	@rm -rf $(PROJECT_DIR)/runtime/.chalice/deployments
 
 stack-deploy: docker-build-prod stack-queue-deploy stack-s3-deploy stack-lambda-deploy cleanup-deploy
 
