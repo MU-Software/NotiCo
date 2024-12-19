@@ -182,7 +182,7 @@ class NotiCoApp(aws_cdk.Stack):
             ecr_repo=ecr_repo,
             stage_config={
                 "automatic_layer": True,
-                "environment_variables": config.env_vars,
+                "environment_variables": config.env_dict,
             },
         )
         app_default_role = app.get_role("DefaultRole")

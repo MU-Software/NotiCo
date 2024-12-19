@@ -53,8 +53,13 @@ lint: hooks-lint  # alias
 mypy: hooks-mypy  # alias
 
 # =============================================================================
+# Config related commands
+generate-chalice-config:
+	@cd $(PROJECT_DIR)/runtime && poetry run python -m chalicelib.cli generate-chalice-config
+
+# =============================================================================
 # AWS CDK related commands
-stack-ecr-deploy:
+stack-ecr-deploy: generate-chalice-config
 	@cdk deploy notico-ecr
 
 stack-queue-deploy:
@@ -69,7 +74,7 @@ stack-lambda-deploy:
 cleanup-deploy:
 	@rm -rf $(PROJECT_DIR)/cdk.out
 	@rm -rf $(PROJECT_DIR)/chalice.out
-	@rm -rf $(PROJECT_DIR)/runtime/.chalice/deployments
+	@rm -rf $(PROJECT_DIR)/runtime/.chalice
 
 stack-deploy: docker-build-prod stack-queue-deploy stack-s3-deploy stack-lambda-deploy cleanup-deploy
 
